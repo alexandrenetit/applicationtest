@@ -6,18 +6,24 @@
 public record Money
 {
     public decimal Amount { get; }
-    public string Currency { get; } = "USD"; // Default currency
+    public string Currency { get; }
+    public string Symbol { get; }
 
-    public Money(decimal amount, string? currency = null)
+    private static readonly Dictionary<string, string> CurrencySymbols = new()
     {
-        if (amount < 0)
-            throw new ArgumentException("Money amount cannot be negative");
+        ["USD"] = "$",
+        ["EUR"] = "€",
+        ["BRL"] = "R$",
+        ["GBP"] = "£",
+        ["JPY"] = "¥"
+    };
 
+    public Money(decimal amount, string currency)
+    {
         Amount = amount;
-        Currency = currency ?? Currency;
+        Currency = currency;
+        Symbol = CurrencySymbols[currency];
     }
 
-    // Operator overloads for money operations
-    public static Money operator +(Money a, Money b) => new(a.Amount + b.Amount, a.Currency);
-    public static Money operator -(Money a, Money b) => new(a.Amount - b.Amount, a.Currency);
+    public string Formatted => $"{Symbol}{Amount:0.00}";
 }

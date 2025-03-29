@@ -46,7 +46,23 @@ public class Sale : BaseEntity
     /// <summary>
     /// Total amount of the sale
     /// </summary>
-    public Money TotalAmount => new(_items.Sum(item => item.TotalAmount.Amount));        
+    public Money TotalAmount
+    {
+        get
+        {
+            if (_items.Count == 0)
+                return new Money(0, "USD"); // Default currency when no items
+
+            // Get currency from first item (assuming all items have same currency)
+            var currency = _items.First().TotalAmount.Currency;
+
+            // Verify all items have the same currency
+            if (_items.Any(item => item.TotalAmount.Currency != currency))
+                throw new InvalidOperationException("Cannot sum amounts with different currencies");
+
+            return new Money(_items.Sum(item => item.TotalAmount.Amount), currency);
+        }
+    }
 
     /// <summary>
     /// Adds a product to the sale with specified quantity

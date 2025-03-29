@@ -35,7 +35,9 @@ public class SaleItem : BaseEntity
     /// <summary>
     /// Calculated total amount for this item
     /// </summary>
-    public Money TotalAmount => new(UnitPrice.Amount * Quantity * (1 - Discount));
+    public Money TotalAmount => new(
+        amount: UnitPrice.Amount * Quantity * (1 - Discount),
+        currency: UnitPrice.Currency);
 
     /// <summary>
     /// The discount strategy used for this sale item
