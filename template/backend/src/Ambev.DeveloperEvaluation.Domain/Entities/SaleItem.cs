@@ -1,5 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.Domain.Common;
+using Ambev.DeveloperEvaluation.Domain.Strategies.Discounts;
+using Ambev.DeveloperEvaluation.Domain.Strategies.Discounts.Enums;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
@@ -35,22 +37,43 @@ public class SaleItem : BaseEntity
     /// </summary>
     public Money TotalAmount => new(UnitPrice.Amount * Quantity * (1 - Discount));
 
-    public SaleItem(Product product, int quantity)
+    /// <summary>
+    /// The discount strategy used for this sale item
+    /// </summary>
+    private readonly IDiscountStrategy _discountStrategy;
+
+    /// <summary>
+    /// Creates a new sale item with the specified discount strategy type
+    /// </summary>
+    /// <param name="product">Product being sold</param>
+    /// <param name="quantity">Quantity of the product</param>
+    /// <param name="strategyType">Type of discount strategy to apply (defaults to Standard)</param>
+    public SaleItem(Product product, int quantity, DiscountStrategyType strategyType = DiscountStrategyType.Standard)
+        : this(product, quantity, DiscountStrategyFactory.CreateStrategy(strategyType))
+    {
+    }
+
+    /// <summary>
+    /// Creates a new sale item with a custom discount strategy instance
+    /// </summary>
+    /// <param name="product">Product being sold</param>
+    /// <param name="quantity">Quantity of the product</param>
+    /// <param name="discountStrategy">Custom discount strategy to apply</param>
+    public SaleItem(Product product, int quantity, IDiscountStrategy discountStrategy)
     {
         Product = product;
         Quantity = quantity;
         UnitPrice = product.UnitPrice;
+        _discountStrategy = discountStrategy;
         ApplyDiscountRules();
     }
 
+    /// <summary>
+    /// Applies the discount rules based on the current discount strategy
+    /// </summary>
     private void ApplyDiscountRules()
     {
-        Discount = Quantity switch
-        {
-            >= 10 and <= 20 => 0.2m,
-            >= 4 and < 10 => 0.1m,
-            _ => 0m
-        };
+        Discount = _discountStrategy.CalculateDiscount(Quantity);
     }
 
     /// <summary>

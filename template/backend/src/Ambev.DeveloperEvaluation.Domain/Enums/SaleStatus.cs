@@ -6,5 +6,6 @@
 public enum SaleStatus
 {
     NotCancelled,
-    Cancelled
+    Cancelled,
+    Pending
 }

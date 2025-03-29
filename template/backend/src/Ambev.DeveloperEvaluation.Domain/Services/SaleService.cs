@@ -1,79 +1,95 @@
-﻿using Ambev.DeveloperEvaluation.Common.Validation;
-using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
-using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Services;
 
-/// <summary>
-/// Implementation of sale operations
-/// </summary>
 public class SaleService : ISaleService
 {
-    private readonly IDiscountCalculator _discountCalculator;
-
-    public SaleService(IDiscountCalculator discountCalculator)
+    /// <summary>
+    /// Creates a new sale with basic validation
+    /// </summary>
+    public Sale CreateSale(Customer customer, Branch branch, string? saleNumber = null)
     {
-        _discountCalculator = discountCalculator;
-    }
+        if (customer == null) throw new ArgumentNullException(nameof(customer));
+        if (branch == null) throw new ArgumentNullException(nameof(branch));
 
-    public async Task<Sale> CreateSaleAsync(string saleNumber, Customer customer, Branch branch)
-    {
-        var sale = new Sale
+        return new Sale
         {
-            SaleNumber = saleNumber,
+            SaleNumber = saleNumber ?? GenerateSaleNumber(),
             SaleDate = DateTime.UtcNow,
             Customer = customer,
-            Branch = branch
+            Branch = branch,
+            Status = SaleStatus.Pending
         };
-        var validationErrors = await sale.ValidateAsync();
-
-        if (validationErrors.Any())
-        {
-            throw new DomainException(
-                $"Invalid sale creation: {string.Join(", ", validationErrors.Select(e => e.Detail))}");
-        }
-
-        return sale;
     }
 
-    public async Task AddItemToSaleAsync(Sale sale, Product product, int quantity)
+    /// <summary>
+    /// Adds items to sale with basic quantity validation
+    /// </summary>
+    public void AddItemsToSale(Sale sale, IEnumerable<(Product product, int quantity)> items)
     {
+        if (sale == null) throw new ArgumentNullException(nameof(sale));
+        if (items == null) throw new ArgumentNullException(nameof(items));
+
+        if (sale.Status != SaleStatus.Pending)
+        {
+            throw new InvalidOperationException("Items can only be added to pending sales");
+        }
+
+        foreach (var (product, quantity) in items)
+        {
+            if (quantity <= 0)
+            {
+                throw new ArgumentException($"Invalid quantity {quantity} for product {product.Name}");
+            }
+
+            sale.AddItem(product, quantity);
+        }
+    }
+
+    // <summary>
+    /// Completes the sale after validation
+    /// </summary>
+    public void CompleteSale(Sale sale)
+    {
+        if (sale == null) throw new ArgumentNullException(nameof(sale));
+
+        var validation = sale.Validate();
+        if (!validation.IsValid)
+        {
+            throw new InvalidOperationException(
+                $"Sale validation failed: {string.Join(", ", validation.Errors.Select(e => e.Detail))}");
+        }
+
+        // Additional business rules could be added here
+        if (sale.Items.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot complete sale with no items");
+        }
+    }
+
+    /// <summary>
+    /// Cancels a sale with basic validation
+    /// </summary>
+    public void CancelSale(Sale sale, string? reason = null)
+    {
+        if (sale == null) throw new ArgumentNullException(nameof(sale));
+
         if (sale.Status == SaleStatus.Cancelled)
-            throw new DomainException("Cannot add items to a cancelled sale");
-
-        // Apply business rules through discount calculator
-        var discount = _discountCalculator.CalculateDiscount(quantity);
-
-        sale.AddItem(product, quantity);
-
-        var validationErrors = await sale.ValidateAsync();
-        if (validationErrors.Any())
         {
-            throw new DomainException(
-                $"Invalid item addition: {string.Join(", ", validationErrors.Select(e => e.Detail))}");
+            throw new InvalidOperationException("Sale is already cancelled");
         }
-    }
 
-    public Task<Money> CalculateTotalAsync(Sale sale)
-    {
-        return Task.FromResult(sale.TotalAmount);
-    }
-
-    public async Task CancelSaleAsync(Sale sale)
-    {
         sale.Cancel();
 
-        var validationErrors = await sale.ValidateAsync();
-        if (validationErrors.Any())
-        {
-            throw new DomainException(
-                $"Invalid sale cancellation: {string.Join(", ", validationErrors.Select(e => e.Detail))}");
-        }
+        // Additional cancellation logic could be added here
     }
 
-    public Task<IEnumerable<ValidationErrorDetail>> ValidateSaleAsync(Sale sale)
+    /// <summary>
+    /// Simple sale number generation (can be replaced with more complex logic later)
+    /// </summary>
+    private string GenerateSaleNumber()
     {
-        return sale.ValidateAsync();
+        return $"SALE-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
     }
 }
