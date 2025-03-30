@@ -25,20 +25,13 @@ public class DefaultContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Seed branches
-        modelBuilder.Entity<Branch>().HasData(BranchSeed.GetSeedBranches());
+        modelBuilder.GetSeedBranches();        
+
+        // Seed products
+        modelBuilder.SeedProducts();
 
         // Seed customers
         modelBuilder.Entity<Customer>().HasData(CustomerSeed.GetSeedCustomers());
-
-        // Seed data with deterministic GUIDs
-        modelBuilder.Entity<Product>().HasData(
-            ProductSeed.GetSeedProducts().Select((p, i) =>
-            {
-                // Generate GUIDs 
-                p.Id = Guid.NewGuid();
-                return p;
-            })
-        );
 
         base.OnModelCreating(modelBuilder);
     }
@@ -58,7 +51,7 @@ public class YourDbContextFactory : IDesignTimeDbContextFactory<DefaultContext>
 
         builder.UseNpgsql(
                connectionString,
-               b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.WebApi")
+               b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
         );
 
         return new DefaultContext(builder.Options);

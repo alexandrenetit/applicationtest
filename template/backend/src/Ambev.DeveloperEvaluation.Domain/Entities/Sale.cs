@@ -62,6 +62,7 @@ public class Sale : BaseEntity
 
             return new Money(_items.Sum(item => item.TotalAmount.Amount), currency);
         }
+        set => TotalAmount = value;
     }
 
     /// <summary>

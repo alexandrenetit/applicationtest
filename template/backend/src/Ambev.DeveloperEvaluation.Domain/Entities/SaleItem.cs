@@ -44,6 +44,9 @@ public class SaleItem : BaseEntity
     /// </summary>
     private readonly IDiscountStrategy _discountStrategy;
 
+    // Add a parameterless constructor for EF Core
+    protected SaleItem() { }
+
     /// <summary>
     /// Creates a new sale item with the specified discount strategy type
     /// </summary>

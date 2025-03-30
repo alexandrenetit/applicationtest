@@ -1,95 +1,186 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Seeds;
 
 public static class BranchSeed
 {
-    public static List<Branch> GetSeedBranches()
+    public static void GetSeedBranches(this ModelBuilder modelBuilder)
     {
-        return new List<Branch>
-        {
-            new Branch
+        // Configure Branch entity and its owned type Address
+        modelBuilder.Entity<Branch>()
+            .OwnsOne(b => b.Address);
+
+        // Seed Branch entities
+        modelBuilder.Entity<Branch>().HasData(
+            new
             {
-                Id = new Guid("a8b3c2d1-1234-5678-9012-abcdef123456"),
-                Name = "Manhattan Downtown",
-                Address = new Address("200 Broadway", "New York", "NY", "10038", "USA"),
-                PhoneNumber = "(212) 555-0101",
+                Id = Guid.Parse("7f89f537-8c49-4c90-b21f-ef1a9c5d4cb0"),
+                Name = "Downtown Headquarters",
+                PhoneNumber = "555-123-4567",
                 Status = BranchStatus.Active
             },
-            new Branch
+            new
             {
-                Id = new Guid("b9c4d3e2-2345-6789-0123-bcdef1234567"),
-                Name = "Brooklyn Heights",
-                Address = new Address("55 Water St", "Brooklyn", "NY", "11201", "USA"),
-                PhoneNumber = "(718) 555-0202",
+                Id = Guid.Parse("93e5e068-d2de-4e24-8211-c16e3e6a9a9b"),
+                Name = "Westside Mall Location",
+                PhoneNumber = "555-234-5678",
                 Status = BranchStatus.Active
             },
-            new Branch
+            new
             {
-                Id = new Guid("c5d6e7f8-3456-7890-1234-cdef12345678"),
-                Name = "Chicago Loop",
-                Address = new Address("233 S Wacker Dr", "Chicago", "IL", "60606", "USA"),
-                PhoneNumber = "(312) 555-0303",
+                Id = Guid.Parse("4c91b7eb-7b2d-4f1c-b936-e3852e0e3f53"),
+                Name = "North District Branch",
+                PhoneNumber = "555-345-6789",
+                Status = BranchStatus.Active
+            },
+            new
+            {
+                Id = Guid.Parse("01c4a1b1-2d77-497a-b15d-3fcb71f66215"),
+                Name = "Southside Center",
+                PhoneNumber = "555-456-7890",
+                Status = BranchStatus.Active
+            },
+            new
+            {
+                Id = Guid.Parse("bde82fa1-66b9-4ef4-a33b-151fb33f2507"),
+                Name = "East End Location",
+                PhoneNumber = "555-567-8901",
+                Status = BranchStatus.Active
+            },
+            new
+            {
+                Id = Guid.Parse("49b5898e-2050-438a-b74c-ad4a97e2f9ed"),
+                Name = "Airport Terminal Shop",
+                PhoneNumber = "555-678-9012",
                 Status = BranchStatus.UnderRenovation
             },
-            new Branch
+            new
             {
-                Id = new Guid("d7e8f9a0-4567-8901-2345-def123456789"),
-                Name = "San Francisco Downtown",
-                Address = new Address("1 Market St", "San Francisco", "CA", "94105", "USA"),
-                PhoneNumber = "(415) 555-0404",
+                Id = Guid.Parse("c9e06c79-60cc-457f-97c6-e18de43c0e9b"),
+                Name = "University Campus Branch",
+                PhoneNumber = "555-789-0123",
+                Status = BranchStatus.Active
+            },
+            new
+            {
+                Id = Guid.Parse("3d4dda28-d3e6-4467-94f5-d1b3855f789e"),
+                Name = "Business District Office",
+                PhoneNumber = "555-890-1234",
+                Status = BranchStatus.Active
+            },
+            new
+            {
+                Id = Guid.Parse("85728ac7-d654-4b5d-9def-fd8ed92d8538"),
+                Name = "Industrial Zone Branch",
+                PhoneNumber = "555-901-2345",
                 Status = BranchStatus.TemporarilyClosed
             },
-            new Branch
+            new
             {
-                Id = new Guid("e9f0a1b2-5678-9012-3456-ef1234567890"),
-                Name = "Seattle Center",
-                Address = new Address("400 Broad St", "Seattle", "WA", "98109", "USA"),
-                PhoneNumber = "(206) 555-0505",
-                Status = BranchStatus.Active
-            },
-            new Branch
-            {
-                Id = new Guid("f1a2b3c4-6789-0123-4567-f12345678901"),
-                Name = "Boston Financial District",
-                Address = new Address("100 Federal St", "Boston", "MA", "02110", "USA"),
-                PhoneNumber = "(617) 555-0606",
-                Status = BranchStatus.Active
-            },
-            new Branch
-            {
-                Id = new Guid("a2b3c4d5-7890-1234-5678-123456789012"),
-                Name = "Austin Downtown",
-                Address = new Address("303 Colorado St", "Austin", "TX", "78701", "USA"),
-                PhoneNumber = "(512) 555-0707",
-                Status = BranchStatus.Active
-            },
-            new Branch
-            {
-                Id = new Guid("b3c4d5e6-8901-2345-6789-234567890123"),
-                Name = "Miami Beach",
-                Address = new Address("1200 Ocean Dr", "Miami Beach", "FL", "33139", "USA"),
-                PhoneNumber = "(305) 555-0808",
-                Status = BranchStatus.Active
-            },
-            new Branch
-            {
-                Id = new Guid("c4d5e6f7-9012-3456-7890-345678901234"),
-                Name = "Denver Tech Center",
-                Address = new Address("8000 E Belleview Ave", "Greenwood Village", "CO", "80111", "USA"),
-                PhoneNumber = "(303) 555-0909",
+                Id = Guid.Parse("f6a7c5db-e766-4bf8-b1e3-dcbcd60d73d3"),
+                Name = "Suburban Mall Kiosk",
+                PhoneNumber = "555-012-3456",
                 Status = BranchStatus.ClosedPermanently
-            },
-            new Branch
-            {
-                Id = new Guid("d5e6f7a8-0123-4567-8901-456789012345"),
-                Name = "Los Angeles Hollywood",
-                Address = new Address("6801 Hollywood Blvd", "Los Angeles", "CA", "90028", "USA"),
-                PhoneNumber = "(213) 555-1010",
-                Status = BranchStatus.Active
             }
-        };
+        );
+
+        // Seed Address owned entities
+        modelBuilder.Entity<Branch>()
+            .OwnsOne(b => b.Address)
+            .HasData(
+                new
+                {
+                    BranchId = Guid.Parse("7f89f537-8c49-4c90-b21f-ef1a9c5d4cb0"),
+                    Street = "123 Main Street",
+                    City = "Metropolis",
+                    State = "NY",
+                    PostalCode = "10001",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("93e5e068-d2de-4e24-8211-c16e3e6a9a9b"),
+                    Street = "456 Western Avenue",
+                    City = "Metropolis",
+                    State = "NY",
+                    PostalCode = "10002",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("4c91b7eb-7b2d-4f1c-b936-e3852e0e3f53"),
+                    Street = "789 Northern Boulevard",
+                    City = "Northville",
+                    State = "NY",
+                    PostalCode = "10101",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("01c4a1b1-2d77-497a-b15d-3fcb71f66215"),
+                    Street = "321 Southern Road",
+                    City = "Southtown",
+                    State = "NY",
+                    PostalCode = "10202",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("bde82fa1-66b9-4ef4-a33b-151fb33f2507"),
+                    Street = "654 Eastern Parkway",
+                    City = "Eastville",
+                    State = "NY",
+                    PostalCode = "10303",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("49b5898e-2050-438a-b74c-ad4a97e2f9ed"),
+                    Street = "987 Airport Terminal C",
+                    City = "Metropolis",
+                    State = "NY",
+                    PostalCode = "10005",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("c9e06c79-60cc-457f-97c6-e18de43c0e9b"),
+                    Street = "246 University Drive",
+                    City = "College Town",
+                    State = "NY",
+                    PostalCode = "10404",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("3d4dda28-d3e6-4467-94f5-d1b3855f789e"),
+                    Street = "135 Business Center Road",
+                    City = "Metropolis",
+                    State = "NY",
+                    PostalCode = "10006",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("85728ac7-d654-4b5d-9def-fd8ed92d8538"),
+                    Street = "579 Factory Lane",
+                    City = "Industrial Park",
+                    State = "NY",
+                    PostalCode = "10505",
+                    Country = "USA"
+                },
+                new
+                {
+                    BranchId = Guid.Parse("f6a7c5db-e766-4bf8-b1e3-dcbcd60d73d3"),
+                    Street = "864 Suburban Mall, Unit 42",
+                    City = "Suburbia",
+                    State = "NY",
+                    PostalCode = "10606",
+                    Country = "USA"
+                }
+            );
     }
 }
