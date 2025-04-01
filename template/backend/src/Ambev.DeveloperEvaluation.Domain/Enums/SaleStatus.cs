@@ -5,6 +5,7 @@
 /// </summary>
 public enum SaleStatus
 {
+    Completed,
     NotCancelled,
     Cancelled,
     Pending

@@ -8,7 +8,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
 /// <summary>
 /// Handles the creation of a new sale transaction
 /// </summary>
-public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResponse>
+public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
 {
     private readonly ISaleService _saleService;
     private readonly ISaleRepository _saleRepository;
@@ -40,7 +40,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
     /// <param name="command">The sale creation command containing customer, branch, and product information</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result containing either the created sale response or validation/domain errors</returns>
-    public async Task<CreateSaleResponse> Handle(
+    public async Task<CreateSaleResult> Handle(
         CreateSaleCommand command,
         CancellationToken cancellationToken)
     {
@@ -64,11 +64,12 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         var productIds = command.Items.Select(i => i.ProductId).ToList();
         var products = await _productRepository.GetByIdsAsync(productIds);
 
-        if (products.Count() != productIds.Count())
+        if (products.Count != productIds.Count)
         {
-            var missingProducts = productIds.Except(products.Select(p => p.Id)).ToList();
-            throw new InvalidOperationException(
-                $"Products not found: {string.Join(", ", missingProducts)}");
+            var foundProductIds = products.Select(p => p.Id).ToList();
+            var missingProductIds = productIds.Except(foundProductIds).ToList();
+
+            throw new InvalidOperationException($"Products not found: {string.Join(", ", missingProductIds)}");
         }
 
         // Prepare items for domain service
@@ -86,7 +87,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         await _saleRepository.CreateAsync(sale);
 
         // Map to response
-        var response = _mapper.Map<CreateSaleResponse>(sale);
+        var response = _mapper.Map<CreateSaleResult>(sale);
         return response;
     }
 }

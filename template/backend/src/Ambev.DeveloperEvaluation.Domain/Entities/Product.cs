@@ -13,17 +13,17 @@ public class Product : BaseEntity
     /// <summary>
     /// Name of the product
     /// </summary>
-    public string Name { get; private set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// Description of the product
     /// </summary>
-    public string Description { get; private set; }
+    public string Description { get; set; }
 
     /// <summary>
     /// Standard price of the product
     /// </summary>
-    public Money UnitPrice { get; private set; }
+    public Money UnitPrice { get; set; }
 
     public Product(string name, string description, Money unitPrice)
     {
@@ -33,7 +33,8 @@ public class Product : BaseEntity
     }
 
     // Add a parameterless constructor for EF Core
-    protected Product() { }
+    protected Product()
+    { }
 
     /// <summary>
     /// Performs validation of the product entity using the ProductValidator rules.

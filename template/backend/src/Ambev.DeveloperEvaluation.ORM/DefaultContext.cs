@@ -33,6 +33,13 @@ public class DefaultContext : DbContext
         // Seed customers
         modelBuilder.Entity<Customer>().HasData(CustomerSeed.GetSeedCustomers());
 
+        // Configure Money as an owned type
+        modelBuilder.Entity<SaleItem>().OwnsOne(si => si.UnitPrice);
+        modelBuilder.Entity<SaleItem>().OwnsOne(si => si.TotalAmount);
+
+        // If Money is also used in your Sale entity
+        modelBuilder.Entity<Sale>().OwnsOne(s => s.TotalAmount);
+
         base.OnModelCreating(modelBuilder);
     }
 }

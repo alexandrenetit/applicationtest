@@ -35,12 +35,29 @@ public class SaleItem : BaseEntity
     /// <summary>
     /// Calculated total amount for this item
     /// </summary>
+    private Money? _totalAmount;
+
+    /// <summary>
+    /// Calculated total amount for this item
+    /// </summary>
     public Money TotalAmount
     {
-        get => new Money(
-            amount: UnitPrice.Amount * Quantity * (1 - Discount),
-            currency: UnitPrice.Currency);
-        private set { } // Empty setter for EF Core
+        get
+        {
+            if (_totalAmount != null)
+                return _totalAmount;
+
+            // Calculate the raw amount
+            decimal rawAmount = UnitPrice.Amount * Quantity * (1 - Discount);
+
+            // Round to exactly two decimal places
+            decimal roundedAmount = Math.Round(rawAmount, 2, MidpointRounding.AwayFromZero);
+
+            return new Money(
+                amount: roundedAmount,
+                currency: UnitPrice.Currency);
+        }
+        private set => _totalAmount = value;
     }
 
     /// <summary>
@@ -85,6 +102,26 @@ public class SaleItem : BaseEntity
         UnitPrice = product.UnitPrice;
         _discountStrategy = discountStrategy;
         ApplyDiscountRules();
+
+        // Initialize TotalAmount with the calculated value
+        _totalAmount = CalculateTotalAmount();
+    }
+
+    /// <summary>
+    /// Updates the quantity of the item and recalculates the total amount
+    /// </summary>
+    /// <returns></returns>
+    private Money CalculateTotalAmount()
+    {
+        // Calculate the raw amount
+        decimal rawAmount = UnitPrice.Amount * Quantity * (1 - Discount);
+
+        // Round to exactly two decimal places
+        decimal roundedAmount = Math.Round(rawAmount, 2, MidpointRounding.AwayFromZero);
+
+        return new Money(
+            amount: roundedAmount,
+            currency: UnitPrice.Currency);
     }
 
     /// <summary>
@@ -93,6 +130,8 @@ public class SaleItem : BaseEntity
     private void ApplyDiscountRules()
     {
         Discount = _discountStrategy.CalculateDiscount(Quantity);
+        // Update TotalAmount after discount changes
+        _totalAmount = CalculateTotalAmount();
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSalesCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -88,7 +88,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     SaleDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    TotalAmountCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
                     BranchId = table.Column<Guid>(type: "uuid", nullable: false)
                 },

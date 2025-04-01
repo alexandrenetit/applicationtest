@@ -50,7 +50,7 @@ public class ProductRepository : IProductRepository
     /// </summary>
     /// <param name="ids">Collection of product IDs to retrieve</param>
     /// <returns>Collection of found products</returns>
-    public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids)
+    public async Task<List<Product>> GetByIdsAsync(List<Guid> ids)
     {
         return await _context.Products
             .Where(p => ids.Contains(p.Id))

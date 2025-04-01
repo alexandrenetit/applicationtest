@@ -1,18 +1,18 @@
 ﻿using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 
 /// <summary>
-/// Validator for the CreateSaleCommand that ensures all required fields are provided
-/// and that values meet business rules.
+/// Validator for the CreateSaleRequest that ensures all required fields are provided
+/// and that values meet business rules before reaching the application layer.
 /// </summary>
-public class CreateSaleValidator : AbstractValidator<CreateSaleCommand>
+public class CreateSaleRequestValidator : AbstractValidator<CreateSaleRequest>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="CreateSaleValidator"/> class.
-    /// Configures validation rules for the CreateSaleCommand.
+    /// Initializes a new instance of the <see cref="CreateSaleRequestValidator"/> class.
+    /// Configures validation rules for the CreateSaleRequest.
     /// </summary>
-    public CreateSaleValidator()
+    public CreateSaleRequestValidator()
     {
         // Validate Customer ID is provided
         RuleFor(x => x.CustomerId)

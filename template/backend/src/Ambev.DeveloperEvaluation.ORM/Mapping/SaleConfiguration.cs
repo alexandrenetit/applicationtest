@@ -35,18 +35,16 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasColumnName("BranchId");
 
         // Owned Money Type for TotalAmount
-        builder.OwnsOne(s => s.TotalAmount, money =>
+        builder.OwnsOne(si => si.TotalAmount, money =>
         {
             money.Property(m => m.Amount)
                 .HasColumnName("TotalAmount")
                 .HasColumnType("decimal(18,2)")
-                .IsRequired();
-
+                .IsRequired();  // Add this
             money.Property(m => m.Currency)
-                .HasColumnName("Currency")
+                .HasColumnName("TotalAmountCurrency")
                 .HasMaxLength(3)
-                .IsRequired();
-
+                .IsRequired();  // Add this
             money.Ignore(m => m.Symbol);
             money.Ignore(m => m.Formatted);
         });

@@ -64,7 +64,9 @@ public class SaleService : ISaleService
         if (sale.Items.Count == 0)
         {
             throw new DomainException("Cannot complete sale with no items");
-        }
+        }    
+        
+        sale.Complete();
     }
 
     /// <summary>

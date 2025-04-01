@@ -1,11 +1,9 @@
-﻿using MediatR;
-
-namespace Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 
 /// <summary>
-/// Command to create a new sale in the system.
+/// Represents an API request to create a new sale in the system.
 /// </summary>
-public record CreateSaleCommand : IRequest<CreateSaleResult>
+public record CreateSaleRequest
 {
     /// <summary>
     /// Gets the unique identifier of the customer associated with this sale.
@@ -24,7 +22,7 @@ public record CreateSaleCommand : IRequest<CreateSaleResult>
     public string? SaleNumber { get; init; }
 
     /// <summary>
-    /// Gets the collection of items included in this sale.
+    /// Gets the collection of items to be included in this sale.
     /// </summary>
-    public List<CreateSaleItemCommand> Items { get; init; } = new();
+    public List<CreateSaleItemRequest> Items { get; init; } = new();
 }

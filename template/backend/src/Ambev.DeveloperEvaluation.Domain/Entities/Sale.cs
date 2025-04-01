@@ -46,23 +46,33 @@ public class Sale : BaseEntity
     /// <summary>
     /// Total amount of the sale
     /// </summary>
+    private Money? _totalAmount;
+
+    /// <summary>
+    /// Total amount of the sale
+    /// </summary>
     public Money TotalAmount
     {
         get
         {
+            // If there's a stored value, return it
+            if (_totalAmount != null)
+                return _totalAmount;
+
+            // Otherwise calculate from items
             if (_items.Count == 0)
                 return new Money(0, "USD"); // Default currency when no items
 
-            // Get currency from first item (assuming all items have same currency)
             var currency = _items.First().TotalAmount.Currency;
-
-            // Verify all items have the same currency
             if (_items.Any(item => item.TotalAmount.Currency != currency))
                 throw new InvalidOperationException("Cannot sum amounts with different currencies");
 
-            return new Money(_items.Sum(item => item.TotalAmount.Amount), currency);
+            // Calculate the sum and round to two decimal places
+            decimal totalAmount = Math.Round(_items.Sum(item => item.TotalAmount.Amount), 2, MidpointRounding.AwayFromZero);
+
+            return new Money(totalAmount, currency);
         }
-        set => TotalAmount = value;
+        set => _totalAmount = value;
     }
 
     /// <summary>
@@ -80,7 +90,14 @@ public class Sale : BaseEntity
     /// </summary>
     public void AddItem(Product product, int quantity)
     {
-        _items.Add(new SaleItem(product, quantity));
+        var item = new SaleItem(product, quantity);
+        _items.Add(item);
+
+        // Recalculate total amount after adding an item
+        if (_totalAmount == null)
+            _totalAmount = item.TotalAmount;
+        else
+            _totalAmount = new Money(_totalAmount.Amount + item.TotalAmount.Amount, _totalAmount.Currency);
     }
 
     /// <summary>
@@ -90,6 +107,11 @@ public class Sale : BaseEntity
     {
         Status = SaleStatus.Cancelled;
     }
+
+    public void Complete()
+    {
+        Status = SaleStatus.Completed;
+    }   
 
     /// <summary>
     /// Performs validation of the sale entity using the SaleValidator rules.

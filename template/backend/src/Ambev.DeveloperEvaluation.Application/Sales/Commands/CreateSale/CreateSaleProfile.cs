@@ -3,11 +3,19 @@ using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
 
+/// <summary>
+/// AutoMapper profile that defines mappings for sale-related entities in the create sale operation.
+/// </summary>
 public class CreateSaleProfile : Profile
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateSaleProfile"/> class.
+    /// Configures mappings between domain entities and result DTOs for the create sale operation.
+    /// </summary>
     public CreateSaleProfile()
     {
-        CreateMap<Sale, CreateSaleResponse>()
+        // Configure mapping from Sale domain entity to CreateSaleResult DTO
+        CreateMap<Sale, CreateSaleResult>()
             .ForMember(dest => dest.SaleId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.TotalAmount.Amount))
@@ -15,7 +23,8 @@ public class CreateSaleProfile : Profile
             .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.Name))
             .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.Name));
 
-        CreateMap<SaleItem, CreateSaleItemResponse>()
+        // Configure mapping from SaleItem domain entity to CreateSaleItemResult DTO
+        CreateMap<SaleItem, CreateSaleItemResult>()
             .ForMember(dest => dest.ItemId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
             .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Product.Id))

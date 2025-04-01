@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    [Migration("20250331163753_InitialSalesCreate")]
-    partial class InitialSalesCreate
+    [Migration("20250401210129_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -663,7 +663,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("Currency");
+                                .HasColumnName("TotalAmountCurrency");
 
                             b1.HasKey("SaleId");
 

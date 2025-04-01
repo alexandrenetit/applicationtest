@@ -27,7 +27,7 @@ public interface IProductRepository
     /// </summary>
     /// <param name="ids">Collection of product IDs to retrieve</param>
     /// <returns>Collection of found products</returns>
-    Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids);
+    Task<List<Product>> GetByIdsAsync(List<Guid> ids);
 
     /// <summary>
     /// Retrieves all products
