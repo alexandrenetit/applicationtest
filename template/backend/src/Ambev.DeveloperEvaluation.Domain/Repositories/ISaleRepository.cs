@@ -14,7 +14,7 @@ public interface ISaleRepository
     /// </summary>
     /// <param name="sale">Sale entity to add</param>
     /// <returns>The added sale with any generated fields</returns>
-    Task<Sale> AddAsync(Sale sale);
+    Task<Sale> CreateAsync(Sale sale);
 
     // Read
     /// <summary>

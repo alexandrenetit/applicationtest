@@ -21,11 +21,30 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .HasColumnType("decimal(5,4)")
             .IsRequired();
 
-        // Owned Money Type for UnitPrice
+        builder.Property(si => si.SaleId)
+            .IsRequired();
+
+        builder.Property(si => si.ProductId)
+            .IsRequired();
+
+        // Relationships
+        builder.HasOne(si => si.Product)
+            .WithMany()
+            .HasForeignKey(si => si.ProductId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Sale>()
+            .WithMany(s => s.Items)
+            .HasForeignKey(si => si.SaleId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Money as owned entity for UnitPrice
         builder.OwnsOne(si => si.UnitPrice, money =>
         {
             money.Property(m => m.Amount)
-                .HasColumnName("UnitPrice")
+                .HasColumnName("UnitPriceAmount")
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
@@ -33,30 +52,24 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
                 .HasColumnName("UnitPriceCurrency")
                 .HasMaxLength(3)
                 .IsRequired();
+
+            money.Ignore(m => m.Symbol);
+            money.Ignore(m => m.Formatted);
         });
 
-        // Owned Money Type for TotalAmount
+        // Configure TotalAmount as a regular owned entity
         builder.OwnsOne(si => si.TotalAmount, money =>
         {
             money.Property(m => m.Amount)
                 .HasColumnName("TotalAmount")
-                .HasColumnType("decimal(18,2)")
-                .IsRequired();
+                .HasColumnType("decimal(18,2)");
 
             money.Property(m => m.Currency)
                 .HasColumnName("TotalAmountCurrency")
-                .HasMaxLength(3)
-                .IsRequired();
+                .HasMaxLength(3);
+
+            money.Ignore(m => m.Symbol);
+            money.Ignore(m => m.Formatted);
         });
-
-        // Relationships
-        builder.HasOne(si => si.Product)
-            .WithMany()
-            .HasForeignKey("Id")
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Ignore computed properties
-        builder.Ignore(si => si.TotalAmount);
     }
 }

@@ -59,7 +59,10 @@ public class Program
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+
+                // Apply migrations automatically
+                ApplyMigrations(app);
+            }            
 
             app.UseHttpsRedirection();
 
@@ -79,6 +82,24 @@ public class Program
         finally
         {
             Log.CloseAndFlush();
+        }
+    }
+
+    private static void ApplyMigrations(WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<DefaultContext>();
+                context.Database.Migrate();
+                Console.WriteLine("Migrations applied successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error applying migrations: {ex.Message}");
+            }
         }
     }
 }

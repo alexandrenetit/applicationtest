@@ -10,8 +10,8 @@ public class SaleService : ISaleService
     /// </summary>
     public Sale CreateSale(Customer customer, Branch branch, string? saleNumber = null)
     {
-        if (customer == null) throw new ArgumentNullException(nameof(customer));
-        if (branch == null) throw new ArgumentNullException(nameof(branch));
+        if (customer == null) throw new DomainException(nameof(customer));
+        if (branch == null) throw new DomainException(nameof(branch));
 
         return new Sale
         {
@@ -28,12 +28,12 @@ public class SaleService : ISaleService
     /// </summary>
     public void AddItemsToSale(Sale sale, IEnumerable<(Product product, int quantity)> items)
     {
-        if (sale == null) throw new ArgumentNullException(nameof(sale));
-        if (items == null) throw new ArgumentNullException(nameof(items));
+        if (sale == null) throw new DomainException(nameof(sale));
+        if (items == null) throw new DomainException(nameof(items));
 
         if (sale.Status != SaleStatus.Pending)
         {
-            throw new InvalidOperationException("Items can only be added to pending sales");
+            throw new DomainException("Items can only be added to pending sales");
         }
 
         foreach (var (product, quantity) in items)
@@ -52,19 +52,18 @@ public class SaleService : ISaleService
     /// </summary>
     public void CompleteSale(Sale sale)
     {
-        if (sale == null) throw new ArgumentNullException(nameof(sale));
+        if (sale == null) throw new DomainException(nameof(sale));
 
         var validation = sale.Validate();
         if (!validation.IsValid)
         {
-            throw new InvalidOperationException(
+            throw new DomainException(
                 $"Sale validation failed: {string.Join(", ", validation.Errors.Select(e => e.Detail))}");
         }
 
-        // Additional business rules could be added here
         if (sale.Items.Count == 0)
         {
-            throw new InvalidOperationException("Cannot complete sale with no items");
+            throw new DomainException("Cannot complete sale with no items");
         }
     }
 
@@ -73,16 +72,14 @@ public class SaleService : ISaleService
     /// </summary>
     public void CancelSale(Sale sale, string? reason = null)
     {
-        if (sale == null) throw new ArgumentNullException(nameof(sale));
+        if (sale == null) throw new DomainException(nameof(sale));
 
         if (sale.Status == SaleStatus.Cancelled)
         {
-            throw new InvalidOperationException("Sale is already cancelled");
+            throw new DomainException("Sale is already cancelled");
         }
 
-        sale.Cancel();
-
-        // Additional cancellation logic could be added here
+        sale.Cancel();        
     }
 
     /// <summary>

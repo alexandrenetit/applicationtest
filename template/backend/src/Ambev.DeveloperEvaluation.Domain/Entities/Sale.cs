@@ -66,6 +66,16 @@ public class Sale : BaseEntity
     }
 
     /// <summary>
+    /// Foreign key for the customer who made the purchase
+    /// </summary>
+    public Guid CustomerId { get; set; }
+
+    /// <summary>
+    /// Foreign key for the branch where the sale was made
+    /// </summary>
+    public Guid BranchId { get; set; }
+
+    /// <summary>
     /// Adds a product to the sale with specified quantity
     /// </summary>
     public void AddItem(Product product, int quantity)

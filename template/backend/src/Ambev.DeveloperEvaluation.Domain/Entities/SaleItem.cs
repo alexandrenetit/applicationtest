@@ -35,14 +35,28 @@ public class SaleItem : BaseEntity
     /// <summary>
     /// Calculated total amount for this item
     /// </summary>
-    public Money TotalAmount => new(
-        amount: UnitPrice.Amount * Quantity * (1 - Discount),
-        currency: UnitPrice.Currency);
+    public Money TotalAmount
+    {
+        get => new Money(
+            amount: UnitPrice.Amount * Quantity * (1 - Discount),
+            currency: UnitPrice.Currency);
+        private set { } // Empty setter for EF Core
+    }
 
     /// <summary>
     /// The discount strategy used for this sale item
     /// </summary>
     private readonly IDiscountStrategy _discountStrategy;
+
+    /// <summary>
+    /// Foreign key for the sale this item belongs to
+    /// </summary>
+    public Guid SaleId { get; set; }
+
+    /// <summary>
+    /// Foreign key for the product being sold
+    /// </summary>
+    public Guid ProductId { get; set; }
 
     // Add a parameterless constructor for EF Core
     protected SaleItem() { }

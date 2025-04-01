@@ -26,6 +26,14 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasConversion<string>()
             .HasMaxLength(20);
 
+        builder.Property(s => s.CustomerId)
+            .IsRequired()
+            .HasColumnName("CustomerId");
+
+        builder.Property(s => s.BranchId)
+            .IsRequired()
+            .HasColumnName("BranchId");
+
         // Owned Money Type for TotalAmount
         builder.OwnsOne(s => s.TotalAmount, money =>
         {
@@ -43,23 +51,29 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             money.Ignore(m => m.Formatted);
         });
 
-        // Relationships
+        // Relationships - Corrected
         builder.HasOne(s => s.Customer)
-            .WithMany()
-            .HasForeignKey(s => s.Id)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+           .WithMany()
+           .HasForeignKey(s => s.CustomerId)  // Correct foreign key
+           .IsRequired()
+           .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(s => s.Branch)
             .WithMany()
-            .HasForeignKey(s => s.Id)
+            .HasForeignKey(s => s.BranchId)  // Correct foreign key
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Navigation property for Items
+        // Navigation property for Items - Corrected
         builder.HasMany(s => s.Items)
             .WithOne()
-            .HasForeignKey("Id")
+            .HasForeignKey(si => si.SaleId)  // Should be SaleId in SaleItem
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Indexes
+        builder.HasIndex(s => s.SaleNumber).IsUnique();
+        builder.HasIndex(s => s.SaleDate);
+        builder.HasIndex(s => s.CustomerId);
+        builder.HasIndex(s => s.BranchId);
     }
 }

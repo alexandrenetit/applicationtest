@@ -8,24 +8,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     /// <inheritdoc />
-    public partial class _202503301116_AddEntitiesMigration : Migration
+    public partial class InitialSalesCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Users",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "Users",
-                type: "timestamp with time zone",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "Branches",
                 columns: table => new
@@ -74,6 +61,25 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Password = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sales",
                 columns: table => new
                 {
@@ -82,20 +88,22 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     SaleDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
+                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BranchId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sales", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Sales_Branches_Id",
-                        column: x => x.Id,
+                        name: "FK_Sales_Branches_BranchId",
+                        column: x => x.BranchId,
                         principalTable: "Branches",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Sales_Customers_Id",
-                        column: x => x.Id,
+                        name: "FK_Sales_Customers_CustomerId",
+                        column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -107,22 +115,26 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    UnitPriceAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     UnitPriceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                    Discount = table.Column<decimal>(type: "numeric(5,4)", nullable: false)
+                    Discount = table.Column<decimal>(type: "numeric(5,4)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    TotalAmountCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    SaleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SaleItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SaleItems_Products_Id",
-                        column: x => x.Id,
+                        name: "FK_SaleItems_Products_ProductId",
+                        column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_SaleItems_Sales_Id",
-                        column: x => x.Id,
+                        name: "FK_SaleItems_Sales_SaleId",
+                        column: x => x.SaleId,
                         principalTable: "Sales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -178,6 +190,37 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     { new Guid("e3b46d88-6319-4e64-94a8-90cf612984d1"), "Abbey Beer", "Leffe Blonde", 5.50m, "EUR" },
                     { new Guid("f1a6b5e1-c9d0-4a41-8d29-1399e81b3c8d"), "American Lager", "Budweiser", 2.99m, "USD" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SaleItems_ProductId",
+                table: "SaleItems",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SaleItems_SaleId",
+                table: "SaleItems",
+                column: "SaleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_BranchId",
+                table: "Sales",
+                column: "BranchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_CustomerId",
+                table: "Sales",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_SaleDate",
+                table: "Sales",
+                column: "SaleDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_SaleNumber",
+                table: "Sales",
+                column: "SaleNumber",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -185,6 +228,9 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
         {
             migrationBuilder.DropTable(
                 name: "SaleItems");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Products");
@@ -197,14 +243,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
 
             migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "Users");
         }
     }
 }

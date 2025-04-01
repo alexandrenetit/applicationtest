@@ -28,7 +28,7 @@ public class SaleRepository : ISaleRepository
     /// </summary>
     /// <param name="sale">Sale entity to add</param>
     /// <returns>The added sale with any generated fields</returns>
-    public async Task<Sale> AddAsync(Sale sale)
+    public async Task<Sale> CreateAsync(Sale sale)
     {
         await _context.Sales.AddAsync(sale);
         await _context.SaveChangesAsync();

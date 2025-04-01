@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    [Migration("20250330142419_202503301116_AddEntitiesMigration")]
-    partial class _202503301116_AddEntitiesMigration
+    [Migration("20250331163753_InitialSalesCreate")]
+    partial class InitialSalesCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -291,7 +291,16 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Sale", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("BranchId");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CustomerId");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("timestamp with time zone");
@@ -308,21 +317,41 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SaleDate");
+
+                    b.HasIndex("SaleNumber")
+                        .IsUnique();
+
                     b.ToTable("Sales", (string)null);
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.SaleItem", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(5,4)");
 
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("SaleId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleId");
 
                     b.ToTable("SaleItems", (string)null);
                 });
@@ -611,13 +640,13 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 {
                     b.HasOne("Ambev.DeveloperEvaluation.Domain.Entities.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("Id")
+                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Ambev.DeveloperEvaluation.Domain.Entities.Customer", "Customer")
                         .WithMany()
-                        .HasForeignKey("Id")
+                        .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -656,15 +685,38 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 {
                     b.HasOne("Ambev.DeveloperEvaluation.Domain.Entities.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("Id")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Ambev.DeveloperEvaluation.Domain.Entities.Sale", null)
                         .WithMany("Items")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("Ambev.DeveloperEvaluation.Domain.ValueObjects.Money", "TotalAmount", b1 =>
+                        {
+                            b1.Property<Guid>("SaleItemId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("TotalAmount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("TotalAmountCurrency");
+
+                            b1.HasKey("SaleItemId");
+
+                            b1.ToTable("SaleItems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SaleItemId");
+                        });
 
                     b.OwnsOne("Ambev.DeveloperEvaluation.Domain.ValueObjects.Money", "UnitPrice", b1 =>
                         {
@@ -673,7 +725,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
-                                .HasColumnName("UnitPrice");
+                                .HasColumnName("UnitPriceAmount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
@@ -690,6 +742,9 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                         });
 
                     b.Navigation("Product");
+
+                    b.Navigation("TotalAmount")
+                        .IsRequired();
 
                     b.Navigation("UnitPrice")
                         .IsRequired();
