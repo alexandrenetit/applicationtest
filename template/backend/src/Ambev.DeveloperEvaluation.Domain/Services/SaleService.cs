@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
+using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Services;
 
@@ -19,7 +20,7 @@ public class SaleService : ISaleService
             SaleDate = DateTime.UtcNow,
             Customer = customer,
             Branch = branch,
-            Status = SaleStatus.Pending
+            Status = SaleStatus.Created
         };
     }
 
@@ -82,6 +83,97 @@ public class SaleService : ISaleService
         }
 
         sale.Cancel();        
+    }
+
+    /// <summary>
+    /// Updates an existing sale with new customer, branch information and intelligently manages item changes
+    /// </summary>
+    /// <remarks>
+    /// This method implements a smart item update strategy:
+    /// - Adds new products not currently in the sale
+    /// - Updates quantities for existing products
+    /// - Removes products with zero quantity
+    /// - Preserves items not mentioned in the update
+    /// </remarks>
+    public Sale UpdateSale(Sale sale, Customer customer, Branch branch, IEnumerable<(Product product, int quantity)>? items = null)
+    {
+        if (sale == null) throw new DomainException(nameof(sale));
+        if (customer == null) throw new DomainException(nameof(customer));
+        if (branch == null) throw new DomainException(nameof(branch));
+
+        if (sale.Status == SaleStatus.Cancelled)
+        {
+            throw new DomainException("Cancelled sales cannot be updated");
+        }
+
+        if (sale.Status == SaleStatus.Completed)
+        {
+            throw new DomainException("Completed sales cannot be updated");
+        }
+
+        // Update sale properties
+        sale.Customer = customer;
+        sale.CustomerId = customer.Id;
+        sale.Branch = branch;
+        sale.BranchId = branch.Id;
+
+        // Process item updates if provided
+        if (items != null)
+        {
+            // Create a copy of the current items to work with
+            var existingProducts = sale.Items.ToDictionary(item => item.ProductId, item => item);
+            var productsToUpdate = items.ToList();
+
+            // We need to recreate the sale with updated items
+            // First, get information about current state
+            string currency = sale.TotalAmount.Currency;
+
+            // Create a fresh slate by zeroing the total
+            sale.TotalAmount = new Money(0, currency);
+
+            // Track products we've processed to determine which ones to preserve
+            var processedProductIds = new HashSet<Guid>();
+
+            // Process all updates
+            foreach (var (product, quantity) in productsToUpdate)
+            {
+                if (product == null)
+                {
+                    throw new DomainException("Product cannot be null");
+                }
+
+                processedProductIds.Add(product.Id);
+
+                // Skip removal of items with zero quantity
+                if (quantity <= 0)
+                {
+                    continue;
+                }
+
+                // Add or update the item
+                sale.AddItem(product, quantity);
+            }
+
+            // Preserve existing items that weren't mentioned in the update
+            foreach (var item in existingProducts.Values)
+            {
+                if (!processedProductIds.Contains(item.ProductId))
+                {
+                    // Recreate this item since it wasn't mentioned in the updates
+                    sale.AddItem(item.Product, item.Quantity);
+                }
+            }
+        }
+
+        // Validate the updated sale
+        var validationResult = sale.Validate();
+        if (!validationResult.IsValid)
+        {
+            var errors = string.Join(", ", validationResult.Errors.Select(e => e.Detail));
+            throw new DomainException($"Sale update validation failed: {errors}");
+        }
+
+        return sale;
     }
 
     /// <summary>

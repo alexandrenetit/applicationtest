@@ -31,4 +31,15 @@ public interface ISaleService
     /// <param name="reason">Optional cancellation reason</param>
     /// <exception cref="InvalidOperationException">Thrown if sale is already cancelled</exception>
     void CancelSale(Sale sale, string? reason = null);
+
+    /// <summary>
+    /// Updates an existing sale with new customer, branch information and items
+    /// </summary>
+    /// <param name="sale">The sale to update</param>
+    /// <param name="customer">The new customer for the sale</param>
+    /// <param name="branch">The new branch for the sale</param>
+    /// <param name="items">Optional collection of products and quantities to replace existing items</param>
+    /// <returns>The updated sale</returns>
+    Sale UpdateSale(Sale sale, Customer customer, Branch branch, IEnumerable<(Product product, int quantity)>? items = null);
+
 }

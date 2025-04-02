@@ -5,6 +5,7 @@
 /// </summary>
 public enum SaleStatus
 {
+    Created,
     Completed,
     NotCancelled,
     Cancelled,

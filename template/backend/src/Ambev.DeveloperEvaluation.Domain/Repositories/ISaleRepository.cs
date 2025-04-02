@@ -57,7 +57,7 @@ public interface ISaleRepository
     /// </summary>
     /// <param name="id">ID of the sale to remove</param>
     /// <returns>True if deletion was successful</returns>
-    Task<bool> DeleteAsync(Guid id);
+    void Delete(Guid id);
 
     /// <summary>
     /// Gets all sales for a specific customer

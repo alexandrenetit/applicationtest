@@ -31,7 +31,6 @@ public class SaleRepository : ISaleRepository
     public async Task<Sale> CreateAsync(Sale sale)
     {
         await _context.Sales.AddAsync(sale);
-        await _context.SaveChangesAsync();
         return sale;
     }
 
@@ -103,7 +102,6 @@ public class SaleRepository : ISaleRepository
     public async Task<Sale> UpdateAsync(Sale sale)
     {
         _context.Entry(sale).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return sale;
     }
 
@@ -114,15 +112,11 @@ public class SaleRepository : ISaleRepository
     /// </summary>
     /// <param name="id">ID of the sale to remove</param>
     /// <returns>True if deletion was successful</returns>
-    public async Task<bool> DeleteAsync(Guid id)
+    public async void Delete(Guid id)
     {
         var sale = await GetByIdAsync(id);
-        if (sale == null)
-            return false;
-
-        _context.Sales.Remove(sale);
-        await _context.SaveChangesAsync();
-        return true;
+        
+        _context.Sales.Remove(sale);        
     }
 
     /// Gets all sales for a specific customer

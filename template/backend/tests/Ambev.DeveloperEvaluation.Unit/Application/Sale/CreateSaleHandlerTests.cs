@@ -9,6 +9,9 @@ using FluentValidation.Results;
 using Moq;
 using Xunit;
 using Ambev.DeveloperEvaluation.Domain.Events;
+using Ambev.DeveloperEvaluation.Common.Repositories;
+using NSubstitute;
+using Ambev.DeveloperEvaluation.Domain.Specifications;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Sale;
 
@@ -28,6 +31,8 @@ public class CreateSaleHandlerTests
     private readonly CreateSaleHandlerTestData _saleHandlerTestData;
     private readonly CreateSaleCommandHandler _handler;
     private Mock<IEventNotification> _mockEventNotification;
+    private Mock<SaleItemLimitSpecification> _mockSaleItemLimitSpecification;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Set up common test dependencies and create the handler
@@ -43,6 +48,9 @@ public class CreateSaleHandlerTests
         _mockMapper = new Mock<IMapper>();
         _mockValidator = new Mock<IValidator<CreateSaleCommand>>();
         _mockEventNotification = new Mock<IEventNotification>();
+        _mockSaleItemLimitSpecification = new Mock<SaleItemLimitSpecification>();
+
+        _unitOfWork = Substitute.For<IUnitOfWork>();
 
         // Create test data
         _saleHandlerTestData = new CreateSaleHandlerTestData();
@@ -56,7 +64,9 @@ public class CreateSaleHandlerTests
             _mockProductRepository.Object,
             _mockMapper.Object,
             _mockValidator.Object,
-            _mockEventNotification.Object);
+            _mockEventNotification.Object,
+            _mockSaleItemLimitSpecification.Object,
+            _unitOfWork);
     }
 
     /// <summary>

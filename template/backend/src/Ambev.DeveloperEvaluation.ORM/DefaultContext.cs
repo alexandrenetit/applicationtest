@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Common.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.ORM.Seeds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -7,7 +8,7 @@ using System.Reflection;
 
 namespace Ambev.DeveloperEvaluation.ORM;
 
-public class DefaultContext : DbContext
+public class DefaultContext : DbContext, IUnitOfWork
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Sale> Sales { get; set; }
@@ -41,6 +42,18 @@ public class DefaultContext : DbContext
         modelBuilder.Entity<Sale>().OwnsOne(s => s.TotalAmount);
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    public async Task<int> ApplyChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            return 0;
+        }
     }
 }
 

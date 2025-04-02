@@ -1,5 +1,7 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Events;
+﻿using Ambev.DeveloperEvaluation.Common.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Specifications;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -18,6 +20,8 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
     private readonly IEventNotification _eventNotifier;
+    private readonly SaleItemLimitSpecification _saleItemLimitSpecification;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateSaleCommandHandler(
         ISaleService saleService,
@@ -27,7 +31,9 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         IProductRepository productRepository,
         IMapper mapper,
         IValidator<CreateSaleCommand> validator,
-        IEventNotification eventNotifier)
+        IEventNotification eventNotifier,
+        SaleItemLimitSpecification saleItemLimitSpecification,
+        IUnitOfWork unitOfWork)
     {
         _saleService = saleService;
         _saleRepository = saleRepository;
@@ -36,6 +42,8 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         _productRepository = productRepository;
         _mapper = mapper;   
         _eventNotifier = eventNotifier;
+        _saleItemLimitSpecification = saleItemLimitSpecification;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -55,11 +63,11 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
 
         var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
         if (customer == null)
-            throw new InvalidOperationException($"Customer with Id:{command.CustomerId} not found");
+            throw new DomainException($"Customer with Id:{command.CustomerId} not found");
 
         var branch = await _branchRepository.GetByIdAsync(command.BranchId);
         if (branch == null)
-            throw new InvalidOperationException($"Branch with Id:{command.CustomerId} not found");
+            throw new DomainException($"Branch with Id:{command.CustomerId} not found");
 
         // Create sale via domain service
         var sale = _saleService.CreateSale(customer, branch, command.SaleNumber);
@@ -73,7 +81,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
             var foundProductIds = products.Select(p => p.Id).ToList();
             var missingProductIds = productIds.Except(foundProductIds).ToList();
 
-            throw new InvalidOperationException($"Products not found: {string.Join(", ", missingProductIds)}");
+            throw new DomainException($"Products not found: {string.Join(", ", missingProductIds)}");
         }
 
         // Prepare items for domain service
@@ -83,9 +91,13 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
                 item.Quantity
             ));
 
+        if (_saleItemLimitSpecification.IsSatisfiedBy(sale))
+        {
+            throw new DomainException($"Sale item limit exceeded");
+        }
+
         // Add items via domain service
         _saleService.AddItemsToSale(sale, itemsToAdd);
-        _saleService.CompleteSale(sale);
 
         // Persist the sale
         await _saleRepository.CreateAsync(sale);       
