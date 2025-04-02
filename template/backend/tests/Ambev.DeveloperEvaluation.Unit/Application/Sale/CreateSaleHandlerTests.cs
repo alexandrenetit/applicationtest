@@ -8,6 +8,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using Xunit;
+using Ambev.DeveloperEvaluation.Domain.Events;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Sale;
 
@@ -26,6 +27,7 @@ public class CreateSaleHandlerTests
     private readonly Mock<IValidator<CreateSaleCommand>> _mockValidator;
     private readonly CreateSaleHandlerTestData _saleHandlerTestData;
     private readonly CreateSaleCommandHandler _handler;
+    private Mock<IEventNotification> _mockEventNotification;
 
     /// <summary>
     /// Set up common test dependencies and create the handler
@@ -40,6 +42,7 @@ public class CreateSaleHandlerTests
         _mockProductRepository = new Mock<IProductRepository>();
         _mockMapper = new Mock<IMapper>();
         _mockValidator = new Mock<IValidator<CreateSaleCommand>>();
+        _mockEventNotification = new Mock<IEventNotification>();
 
         // Create test data
         _saleHandlerTestData = new CreateSaleHandlerTestData();
@@ -52,7 +55,8 @@ public class CreateSaleHandlerTests
             _mockBranchRepository.Object,
             _mockProductRepository.Object,
             _mockMapper.Object,
-            _mockValidator.Object);
+            _mockValidator.Object,
+            _mockEventNotification.Object);
     }
 
     /// <summary>
@@ -82,6 +86,9 @@ public class CreateSaleHandlerTests
         _mockSaleRepository.Setup(r => r.CreateAsync(testSetup.Sale))
             .ReturnsAsync(testSetup.Sale);
 
+        _mockEventNotification.Setup(e => e.NotifyAsync(It.IsAny<SaleCreatedEvent>()))
+            .Returns(Task.CompletedTask);
+
         _mockMapper.Setup(m => m.Map<CreateSaleResult>(testSetup.Sale))
             .Returns(testSetup.ExpectedResponse);
 
@@ -99,6 +106,7 @@ public class CreateSaleHandlerTests
         _mockSaleService.Verify(s => s.CompleteSale(testSetup.Sale), Times.Once);
         _mockSaleRepository.Verify(r => r.CreateAsync(testSetup.Sale), Times.Once);
         _mockMapper.Verify(m => m.Map<CreateSaleResult>(testSetup.Sale), Times.Once);
+        _mockEventNotification.Verify(e => e.NotifyAsync(It.IsAny<SaleCreatedEvent>()), Times.Once);
     }
 
     /// <summary>

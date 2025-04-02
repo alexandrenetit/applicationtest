@@ -5,10 +5,13 @@ using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.IoC;
 using Ambev.DeveloperEvaluation.ORM;
+using Ambev.DeveloperEvaluation.WebApi.Configurations;
 using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Ambev.DeveloperEvaluation.WebApi.Configurations;
+using Rebus.Config;
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
@@ -22,6 +25,9 @@ public class Program
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.AddDefaultLogging();
+
+            // Get environment early for conditional error handling
+            bool isDevelopment = builder.Environment.IsDevelopment();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -39,6 +45,7 @@ public class Program
             builder.Services.AddJwtAuthentication(builder.Configuration);
 
             builder.RegisterDependencies();
+            builder.Services.AddRebusMessaging(builder.Configuration);
 
             builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(ApplicationLayer).Assembly);
 
@@ -69,15 +76,51 @@ public class Program
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseBasicHealthChecks();
+            app.UseBasicHealthChecks();            
 
             app.MapControllers();
+
+            //app.Services.StartRebus();
 
             app.Run();
         }
         catch (Exception ex)
         {
-            Log.Fatal(ex, "Application terminated unexpectedly");            
+            Log.Fatal(ex, "Application terminated unexpectedly");
+
+            // Determine if we're in development mode
+            bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+            // Only show detailed console error in development mode
+            if (isDevelopment)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("======================================");
+                Console.WriteLine("APPLICATION TERMINATED UNEXPECTEDLY");
+                Console.WriteLine("======================================");
+                Console.WriteLine($"Exception Type: {ex.GetType().Name}");
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine("Stack Trace:");
+                Console.WriteLine(ex.StackTrace);
+
+                // If there are inner exceptions, display those too
+                var innerException = ex.InnerException;
+                int level = 0;
+                while (innerException != null)
+                {
+                    level++;
+                    Console.WriteLine($"\nInner Exception (Level {level}):");
+                    Console.WriteLine($"Type: {innerException.GetType().Name}");
+                    Console.WriteLine($"Message: {innerException.Message}");
+                    Console.WriteLine("Stack Trace:");
+                    Console.WriteLine(innerException.StackTrace);
+
+                    innerException = innerException.InnerException;
+                }
+
+                Console.WriteLine("======================================");
+                Console.ResetColor();
+            }
         }
         finally
         {
