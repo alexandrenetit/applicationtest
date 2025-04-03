@@ -1,6 +1,8 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CancelSale;
+using Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.Commands.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using AutoMapper;
@@ -86,6 +88,33 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
                 Message = "Sale updated successfully",
                 Data = _mapper.Map<UpdateSaleResponse>(response)
             });
+        }
+
+
+        /// <summary>
+        /// Cancel a sale by their ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sale to cancel</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Success response if the sale was cancelled</returns>
+        [HttpPost("{id}/cancel")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CancelSale(
+            CancelSaleRequest request,
+            CancellationToken cancellationToken)
+        {
+            var validator = new CancelSaleRequestValidator();
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+
+            var command = _mapper.Map<CancelSaleCommand>(request.Id);
+            await _mediator.Send(command, cancellationToken);
+
+            return Ok("Sale cancelled successfully");
         }
     }
 }

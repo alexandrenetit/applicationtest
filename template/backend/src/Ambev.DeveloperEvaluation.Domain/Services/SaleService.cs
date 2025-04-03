@@ -20,7 +20,8 @@ public class SaleService : ISaleService
             SaleDate = DateTime.UtcNow,
             Customer = customer,
             Branch = branch,
-            Status = SaleStatus.Created
+            Status = SaleStatus.Created,
+            CreatedAt = DateTime.UtcNow,
         };
     }
 
@@ -60,6 +61,8 @@ public class SaleService : ISaleService
             throw new DomainException("Sale is already cancelled");
         }
 
+        sale.CancelledAt = DateTime.UtcNow;
+
         sale.Cancel();        
     }
 
@@ -85,6 +88,7 @@ public class SaleService : ISaleService
         sale.Branch = branch;
         sale.BranchId = branch.Id;
         sale.Status = SaleStatus.Updated;
+        sale.UpdatedAt = DateTime.UtcNow;
 
         // Process item updates if provided
         if (items != null)

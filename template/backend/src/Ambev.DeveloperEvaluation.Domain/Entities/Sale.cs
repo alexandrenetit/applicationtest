@@ -86,6 +86,21 @@ public class Sale : BaseEntity
     public Guid BranchId { get; set; }
 
     /// <summary>
+    /// Gets the date and time when the category was created.
+    /// </summary>
+    public DateTime CreatedAt { get; init; }
+
+    /// <summary>
+    /// Gets the date and time of the last update to the category's information.
+    /// </summary>
+    public DateTime? UpdatedAt { get;  set; }
+
+    /// <summary>
+    /// Gets the date and time when was cancelled the cart.
+    /// </summary>
+    public DateTime? CancelledAt { get;  set; }
+
+    /// <summary>
     /// Adds a product to the sale with specified quantity
     /// </summary>
     public void AddItem(Product product, int quantity)
