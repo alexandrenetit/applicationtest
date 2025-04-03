@@ -108,10 +108,32 @@ public class Sale : BaseEntity
         Status = SaleStatus.Cancelled;
     }
 
-    public void Complete()
+    public void ClearItems()
     {
-        Status = SaleStatus.Completed;
-    }   
+        // Store the original currency if we have items
+        var originalCurrency = _items.Count > 0
+            ? _items[0].TotalAmount.Currency
+            : "USD"; // default currency
+
+        _items.Clear();
+        _totalAmount = new Money(0, originalCurrency);
+    }
+
+    public void RemoveItem(SaleItem item)
+    {
+        if (item == null) return;
+
+        if (_items.Remove(item))
+        {
+            // Recalculate total if we were tracking it
+            if (_totalAmount != null)
+            {
+                _totalAmount = new Money(
+                    _totalAmount.Amount - item.TotalAmount.Amount,
+                    _totalAmount.Currency);
+            }
+        }
+    }
 
     /// <summary>
     /// Performs validation of the sale entity using the SaleValidator rules.

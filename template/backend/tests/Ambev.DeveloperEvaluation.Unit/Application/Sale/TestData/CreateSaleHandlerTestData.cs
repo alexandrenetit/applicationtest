@@ -246,7 +246,7 @@ public class CreateSaleHandlerTestData
             SaleDate = DateTime.Now,
             Customer = customer,
             Branch = branch,
-            Status = SaleStatus.Completed,
+            Status = SaleStatus.Created,
             CustomerId = customer.Id,
             BranchId = branch.Id
         };

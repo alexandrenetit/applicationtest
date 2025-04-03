@@ -16,20 +16,16 @@ public static class RebusMessagingExtension
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddRebusMessaging(this IServiceCollection services, IConfiguration configuration)
     {
-        //var rabbitConnectionString = configuration.GetConnectionString("RabbitMQ");
-
         services.AddRebus((configure, provider) => configure
             .Logging(l => l.Console())
             .Transport(t => t.UseInMemoryTransport(new InMemNetwork(true), "ambev-sales"))
-            .Routing(r =>
-            {
-                // For publishing events
-                r.TypeBased()
-                    .Map<SaleCreatedEvent>("sale.created");
-            })
+            .Routing(r => r.TypeBased()
+                    .Map<SaleCreatedEvent>("sale.created")
+                    .Map<SaleModifiedEvent>("sale.modified"))
             , onCreated: async bus =>
             {
                 await bus.Subscribe<SaleCreatedEvent>();
+                await bus.Subscribe<SaleModifiedEvent>();
             }
         );
         services.AutoRegisterHandlersFromAssemblyOf<Program>();

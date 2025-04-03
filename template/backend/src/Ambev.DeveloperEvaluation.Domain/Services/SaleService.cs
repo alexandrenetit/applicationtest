@@ -32,9 +32,9 @@ public class SaleService : ISaleService
         if (sale == null) throw new DomainException(nameof(sale));
         if (items == null) throw new DomainException(nameof(items));
 
-        if (sale.Status != SaleStatus.Pending)
+        if (sale.Status == SaleStatus.Cancelled)
         {
-            throw new DomainException("Items can only be added to pending sales");
+            throw new DomainException("Items can only be added to sales canceled");
         }
 
         foreach (var (product, quantity) in items)
@@ -46,29 +46,7 @@ public class SaleService : ISaleService
 
             sale.AddItem(product, quantity);
         }
-    }
-
-    // <summary>
-    /// Completes the sale after validation
-    /// </summary>
-    public void CompleteSale(Sale sale)
-    {
-        if (sale == null) throw new DomainException(nameof(sale));
-
-        var validation = sale.Validate();
-        if (!validation.IsValid)
-        {
-            throw new DomainException(
-                $"Sale validation failed: {string.Join(", ", validation.Errors.Select(e => e.Detail))}");
-        }
-
-        if (sale.Items.Count == 0)
-        {
-            throw new DomainException("Cannot complete sale with no items");
-        }    
-        
-        sale.Complete();
-    }
+    }    
 
     /// <summary>
     /// Cancels a sale with basic validation
@@ -86,15 +64,10 @@ public class SaleService : ISaleService
     }
 
     /// <summary>
-    /// Updates an existing sale with new customer, branch information and intelligently manages item changes
+    /// Updates an existing sale with new customer, branch, and item information.
+    /// Handles item updates by clearing existing items and adding the new items collection.
+    /// Validates the updated sale before returning.
     /// </summary>
-    /// <remarks>
-    /// This method implements a smart item update strategy:
-    /// - Adds new products not currently in the sale
-    /// - Updates quantities for existing products
-    /// - Removes products with zero quantity
-    /// - Preserves items not mentioned in the update
-    /// </remarks>
     public Sale UpdateSale(Sale sale, Customer customer, Branch branch, IEnumerable<(Product product, int quantity)>? items = null)
     {
         if (sale == null) throw new DomainException(nameof(sale));
@@ -106,61 +79,35 @@ public class SaleService : ISaleService
             throw new DomainException("Cancelled sales cannot be updated");
         }
 
-        if (sale.Status == SaleStatus.Completed)
-        {
-            throw new DomainException("Completed sales cannot be updated");
-        }
-
         // Update sale properties
         sale.Customer = customer;
         sale.CustomerId = customer.Id;
         sale.Branch = branch;
         sale.BranchId = branch.Id;
+        sale.Status = SaleStatus.Updated;
 
         // Process item updates if provided
         if (items != null)
         {
-            // Create a copy of the current items to work with
-            var existingProducts = sale.Items.ToDictionary(item => item.ProductId, item => item);
-            var productsToUpdate = items.ToList();
+            // First group and validate items
+            var groupedUpdates = items
+                .Where(x => x.product != null)
+                .GroupBy(x => x.product.Id)
+                .Select(g => (
+                    product: g.First().product,
+                    quantity: g.Sum(x => x.quantity)
+                ))
+                .ToList();
 
-            // We need to recreate the sale with updated items
-            // First, get information about current state
-            string currency = sale.TotalAmount.Currency;
+            // Clear existing items (preserves currency)
+            sale.ClearItems();
 
-            // Create a fresh slate by zeroing the total
-            sale.TotalAmount = new Money(0, currency);
-
-            // Track products we've processed to determine which ones to preserve
-            var processedProductIds = new HashSet<Guid>();
-
-            // Process all updates
-            foreach (var (product, quantity) in productsToUpdate)
+            // Add all updated items
+            foreach (var (product, quantity) in groupedUpdates)
             {
-                if (product == null)
+                if (quantity > 0) // Only add positive quantities
                 {
-                    throw new DomainException("Product cannot be null");
-                }
-
-                processedProductIds.Add(product.Id);
-
-                // Skip removal of items with zero quantity
-                if (quantity <= 0)
-                {
-                    continue;
-                }
-
-                // Add or update the item
-                sale.AddItem(product, quantity);
-            }
-
-            // Preserve existing items that weren't mentioned in the update
-            foreach (var item in existingProducts.Values)
-            {
-                if (!processedProductIds.Contains(item.ProductId))
-                {
-                    // Recreate this item since it wasn't mentioned in the updates
-                    sale.AddItem(item.Product, item.Quantity);
+                    sale.AddItem(product, quantity);
                 }
             }
         }

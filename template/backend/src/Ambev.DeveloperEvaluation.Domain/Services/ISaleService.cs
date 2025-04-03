@@ -15,14 +15,7 @@ public interface ISaleService
     /// </summary>
     /// <param name="sale">The sale to add items to</param>
     /// <param name="items">Collection of products and quantities to add</param>
-    void AddItemsToSale(Sale sale, IEnumerable<(Product product, int quantity)> items);
-
-    /// <summary>
-    /// Completes the sale after validation
-    /// </summary>
-    /// <param name="sale">The sale to complete</param>
-    /// <exception cref="InvalidOperationException">Thrown if validation fails</exception>
-    void CompleteSale(Sale sale);
+    void AddItemsToSale(Sale sale, IEnumerable<(Product product, int quantity)> items);    
 
     /// <summary>
     /// Cancels a sale with basic validation

@@ -10,6 +10,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Specifications
     {
         private readonly int _maximumItemsPerProduct = 20;
 
+        public SaleItemLimitSpecification()
+        {
+        }
+
         public SaleItemLimitSpecification(IConfiguration configuration)
         {
             _maximumItemsPerProduct = int.TryParse(configuration["BusinessRules:Sales:MaximumItemPerProducts"], out var value) ? value : _maximumItemsPerProduct;

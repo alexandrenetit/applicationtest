@@ -1,6 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Common.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Specifications;
@@ -48,7 +47,7 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, Updat
         _saleUpdateAllowedSpecification = saleUpdateAllowedSpecification;
         _saleItemLimitSpecification = saleItemLimitSpecification;
         _unitOfWork = unitOfWork;
-    }    
+    }
 
     // Update the Handle method to use the conversion method
     public async Task<UpdateSaleResult> Handle(
@@ -94,17 +93,6 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, Updat
         // Update sale items and check for inconsistencies
         var saleItems = await ConvertToSaleItemsAsync(command.Items);
         _saleService.UpdateSale(sale, customer, branch, saleItems);
-
-        // Update status if provided
-        if (command.Status.HasValue)
-        {
-            if (command.Status == SaleStatus.Completed)
-                _saleService.CompleteSale(sale);
-            else if (command.Status == SaleStatus.Cancelled)
-                _saleService.CancelSale(sale);
-            else
-                throw new InvalidOperationException($"Unsupported status update: {command.Status}");
-        }
 
         // Check if sale satisfies item limit after changes
         if (_saleItemLimitSpecification.IsSatisfiedBy(sale))

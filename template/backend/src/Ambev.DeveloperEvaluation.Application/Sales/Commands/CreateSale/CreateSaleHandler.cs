@@ -100,8 +100,11 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         _saleService.AddItemsToSale(sale, itemsToAdd);
 
         // Persist the sale
-        await _saleRepository.CreateAsync(sale);       
+        await _saleRepository.CreateAsync(sale);
 
+        await _unitOfWork.ApplyChangesAsync(cancellationToken);
+
+        // Notify about the sale creation event
         await _eventNotifier.NotifyAsync(SaleCreatedEvent.CreateFrom(sale));
 
         // Map to result

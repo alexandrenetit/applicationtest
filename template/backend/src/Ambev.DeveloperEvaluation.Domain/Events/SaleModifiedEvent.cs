@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace Ambev.DeveloperEvaluation.Domain.Events;
 
@@ -8,17 +9,24 @@ namespace Ambev.DeveloperEvaluation.Domain.Events;
 /// </summary>
 public class SaleModifiedEvent
 {
-    public Guid SaleId { get; private set; }
-    public string SaleNumber { get; private set; }
-    public Guid CustomerId { get; private set; }
-    public Guid BranchId { get; private set; }
-    public SaleStatus Status { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
-    public decimal TotalAmount { get; private set; }
-    public string Currency { get; private set; }
-    public List<SaleItemModifiedEvent> Items { get; private set; } = new();
+    public Guid SaleId { get; set; }
+    public string SaleNumber { get; set; } = string.Empty;
+    public Guid CustomerId { get; set; }
+    public Guid BranchId { get; set; }
+    public SaleStatus Status { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public decimal TotalAmount { get; set; }
+    public string Currency { get; set; } = string.Empty;
+    public List<SaleItemModifiedEvent> Items { get; set; } = new();
 
-    private SaleModifiedEvent(
+    // Parameterless constructor for serialization
+    public SaleModifiedEvent()
+    {
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    [JsonConstructor]
+    public SaleModifiedEvent(
         Guid saleId,
         string saleNumber,
         Guid customerId,
@@ -41,11 +49,14 @@ public class SaleModifiedEvent
 
     public static SaleModifiedEvent CreateFrom(Sale sale)
     {
+        if (sale == null)
+            throw new ArgumentNullException(nameof(sale));
+
         var items = sale.Items.Select(item => new SaleItemModifiedEvent
         {
             ItemId = item.Id,
             ProductId = item.ProductId,
-            ProductName = item.Product.Name,
+            ProductName = item.Product?.Name ?? string.Empty,
             Quantity = item.Quantity,
             UnitPrice = item.UnitPrice.Amount,
             Discount = item.Discount,
