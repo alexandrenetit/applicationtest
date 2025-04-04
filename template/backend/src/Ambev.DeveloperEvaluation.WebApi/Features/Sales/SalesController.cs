@@ -1,10 +1,13 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CancelSale;
 using Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.Commands.UpdateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.Queries.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CancelSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CreateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.UpdateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.Queries;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.Queries.GetSale;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +63,30 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             });
         }
 
-        // Add this method to the SalesController class
+        /// <summary>
+        /// Retrieves a sale by their ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sale</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>The sale details if found</returns>
+        [HttpGet("{id}", Name = nameof(GetSale))]
+        [ProducesResponseType(typeof(ApiResponseWithData<SaleResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetSale(GetSaleRequest request, CancellationToken cancellationToken)
+        {
+            var validator = new GetSaleRequestValidator();
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+
+            var command = _mapper.Map<GetSaleCommand>(request.Id);
+            var response = await _mediator.Send(command, cancellationToken);
+
+            return Ok(_mapper.Map<SaleResponse>(response), "Sale retrieved successfully");
+        }
+
         /// <summary>
         /// Updates an existing sale
         /// </summary>
@@ -82,14 +108,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = _mapper.Map<UpdateSaleCommand>(request);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return Ok(new ApiResponseWithData<UpdateSaleResponse>
-            {
-                Success = true,
-                Message = "Sale updated successfully",
-                Data = _mapper.Map<UpdateSaleResponse>(response)
-            });
+            return Ok(_mapper.Map<UpdateSaleResponse>(response), "Sale updated successfully");
         }
-
 
         /// <summary>
         /// Cancel a sale by their ID.

@@ -1,7 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
 using AutoMapper;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CreateSale;
 
 /// <summary>
 /// AutoMapper profile that defines mappings for sale-related entities in the create sale operation.

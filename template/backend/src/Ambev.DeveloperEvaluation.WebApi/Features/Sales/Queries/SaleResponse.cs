@@ -1,11 +1,9 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CreateSale;
-
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Queries;
 
 /// <summary>
-/// Represents the API response returned after successfully creating a sale, containing all sale details.
+/// Response model for sale operations.
 /// </summary>
-public record CreateSaleResponse
+public class SaleResponse
 {
     /// <summary>
     /// Gets the unique identifier of the created sale.
@@ -60,5 +58,5 @@ public record CreateSaleResponse
     /// <summary>
     /// Gets the collection of items included in this sale.
     /// </summary>
-    public List<CreateSaleItemResult> Items { get; init; } = new();
+    public List<SaleItemResponse> Items { get; init; } = new();
 }

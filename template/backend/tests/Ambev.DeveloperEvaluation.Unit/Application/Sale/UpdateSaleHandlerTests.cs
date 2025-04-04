@@ -33,7 +33,7 @@ public class UpdateSaleHandlerTests
     private readonly SaleItemLimitSpecification _saleItemLimitSpecification;
     private readonly SaleUpdateAllowedSpecification _saleUpdateAllowedSpecification;
     private readonly UpdateSaleHandlerTestData _saleHandlerTestData;
-    private readonly UpdateSaleCommandHandler _handler;
+    private readonly UpdateSaleHandler _handler;
     private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
@@ -61,7 +61,7 @@ public class UpdateSaleHandlerTests
         _saleHandlerTestData = new UpdateSaleHandlerTestData();
 
         // Create the handler with the actual dependencies
-        _handler = new UpdateSaleCommandHandler(
+        _handler = new UpdateSaleHandler(
             _mockSaleService.Object,
             _mockSaleRepository.Object,
             _mockCustomerRepository.Object,

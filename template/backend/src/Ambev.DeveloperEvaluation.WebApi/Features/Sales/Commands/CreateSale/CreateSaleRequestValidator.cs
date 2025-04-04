@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CreateSale;
 
 /// <summary>
 /// Validator for the CreateSaleRequest that ensures all required fields are provided

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CancelSale
 {
     /// <summary>
     /// Request model for canceling a sale.

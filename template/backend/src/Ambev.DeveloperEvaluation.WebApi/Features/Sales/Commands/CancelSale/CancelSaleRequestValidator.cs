@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CancelSale
 {
     /// <summary>
     /// Validator for <see cref="CancelSaleRequest"/>.

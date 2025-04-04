@@ -1,4 +1,4 @@
-﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.UpdateSale;
 
 /// <summary>
 /// Represents the response returned after successfully updating a sale.

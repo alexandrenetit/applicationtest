@@ -1,7 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands.CancelSale;
 using AutoMapper;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CancelSale
 {
     /// <summary>
     /// AutoMapper profile that defines mappings between API models and application commands/results

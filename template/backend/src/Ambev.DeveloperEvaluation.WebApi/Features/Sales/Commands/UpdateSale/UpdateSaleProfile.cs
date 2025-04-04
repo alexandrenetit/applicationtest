@@ -3,7 +3,7 @@ using Ambev.DeveloperEvaluation.Application.Sales.Commands.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using AutoMapper;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.UpdateSale;
 
 /// <summary>
 /// AutoMapper profile that defines mappings between API models and application commands/results

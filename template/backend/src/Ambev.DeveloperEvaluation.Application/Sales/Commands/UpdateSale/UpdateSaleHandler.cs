@@ -12,7 +12,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Commands.UpdateSale;
 /// <summary>
 /// Handles the updating of an existing sale transaction
 /// </summary>
-public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
+public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
 {
     private readonly ISaleService _saleService;
     private readonly ISaleRepository _saleRepository;
@@ -25,7 +25,7 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, Updat
     private readonly SaleItemLimitSpecification _saleItemLimitSpecification;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateSaleCommandHandler(
+    public UpdateSaleHandler(
         ISaleService saleService,
         ISaleRepository saleRepository,
         ICustomerRepository customerRepository,
@@ -66,7 +66,7 @@ public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, Updat
 
         // Check if sale can be updated
         if (!_saleUpdateAllowedSpecification.IsSatisfiedBy(sale))
-            throw new DomainException("This sale cannot be updated due to its current status");
+            throw new DomainException("This sale cannot be updated due to its current status which is cancelled");
 
         // Update sale properties if provided
         if (command.SaleNumber != null)

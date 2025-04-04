@@ -1,4 +1,4 @@
-﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.UpdateSale;
 
 /// <summary>
 /// Represents a request to update or add an item to an existing sale.

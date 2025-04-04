@@ -1,4 +1,4 @@
-﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.CreateSale;
 
 /// <summary>
 /// Represents a request to add an item to a sale.

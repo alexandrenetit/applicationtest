@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Commands.UpdateSale;
 
 /// <summary>
 /// Validates the UpdateSaleRequest according to business rules and data integrity requirements.
